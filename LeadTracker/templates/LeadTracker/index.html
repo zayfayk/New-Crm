@@ -1,0 +1,135 @@
+{% extends "LeadTracker/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="hero-section" style="background: url('{% static 'img/hero-background.avif' %}') no-repeat center center/cover; height: 100vh; position: relative; overflow: hidden;">
+    <div class="d-flex flex-column justify-content-center align-items-center text-center text-white h-100" style="background: rgba(34, 34, 34, 0.8); animation: fadeIn 2s ease-in-out;">
+      <h1 class="display-3 fw-bold" style="color: #f8f9fa; font-family: 'Poppins', sans-serif; animation: slideInFromTop 1.5s ease-out;">Welcome to Elite CRM</h1>
+      <p class="lead" style="color: #d1d1d1; font-family: 'Poppins', sans-serif; animation: slideInFromBottom 1.5s ease-out;">Streamline your customer management with our powerful tools.</p>
+      <div class="mt-4">
+        {% if user.is_authenticated %}
+          <a href="{% url 'logout' %}" class="btn btn-outline-light btn-lg" style="animation: fadeIn 2s ease-in-out;">Logout</a>
+        {% else %}
+          <a href="{% url 'login' %}" class="btn btn-gradient btn-lg me-3" style="animation: fadeIn 2s ease-in-out;">Login</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="floating-icons">
+      <div class="floating-icon" style="animation: float 3s infinite;">
+        <i class="fas fa-user-tie fa-3x" style="color: #007bff;"></i>
+        <p class="text-white mt-2" style="font-size: 0.9rem;">Customer Management</p>
+      </div>
+      <div class="floating-icon" style="animation: float 4s infinite;">
+        <i class="fas fa-chart-bar fa-3x" style="color: #28a745;"></i>
+        <p class="text-white mt-2" style="font-size: 0.9rem;">Analytics</p>
+      </div>
+      <div class="floating-icon" style="animation: float 5s infinite;">
+        <i class="fas fa-sync-alt fa-3x" style="color: #ffc107;"></i>
+        <p class="text-white mt-2" style="font-size: 0.9rem;">Integration</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-section text-center py-5" style="background-color: #f8f9fa;">
+    <h2 class="fw-bold" style="font-family: 'Poppins', sans-serif; color: #343a40;">Why Choose Elite CRM?</h2>
+    <p class="mt-3" style="color: #6c757d; font-family: 'Poppins', sans-serif;">Our platform offers seamless integration, powerful analytics, and an intuitive interface to help you manage your customers efficiently.</p>
+    <div class="features d-flex flex-wrap justify-content-center mt-4">
+      <div class="feature-box mx-3 text-center" style="flex: 1 1 200px; max-width: 300px;">
+        <i class="fas fa-chart-line fa-3x" style="color: #007bff;"></i>
+        <h5 class="mt-2">Analytics</h5>
+        <p>Gain insights with detailed analytics.</p>
+      </div>
+      <div class="feature-box mx-3 text-center" style="flex: 1 1 200px; max-width: 300px;">
+        <i class="fas fa-users fa-3x" style="color: #28a745;"></i>
+        <h5 class="mt-2">User Management</h5>
+        <p>Manage your team effortlessly.</p>
+      </div>
+      <div class="feature-box mx-3 text-center" style="flex: 1 1 200px; max-width: 300px;">
+        <i class="fas fa-cogs fa-3x" style="color: #ffc107;"></i>
+        <h5 class="mt-2">Customization</h5>
+        <p>Tailor the platform to your needs.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'fontawesome/all.min.css' %}">
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slideInFromTop {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes slideInFromBottom {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .btn-gradient {
+    background: linear-gradient(45deg, #007bff, #6610f2);
+    border: none;
+    color: white;
+    transition: all 0.3s;
+  }
+  .btn-gradient:hover {
+    background: linear-gradient(45deg, #6610f2, #007bff);
+    transform: scale(1.05);
+  }
+  .floating-icons {
+    position: absolute;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-wrap: nowrap;
+    width: 100%;
+    max-width: 600px;
+  }
+  .floating-icon {
+    text-align: center;
+    flex: 1;
+    min-width: 100px;
+  }
+  @media (max-width: 768px) {
+    .hero-section {
+      height: 70vh;
+    }
+    .display-3 {
+      font-size: 2rem;
+    }
+    .lead {
+      font-size: 1rem;
+    }
+    .btn-gradient, .btn-outline-light {
+      font-size: 0.9rem;
+      padding: 0.5rem 1rem;
+    }
+    .floating-icons {
+      bottom: 5%;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .floating-icon {
+      flex: 1 1 100px;
+    }
+    .floating-icon i {
+      font-size: 2rem;
+    }
+    .info-section {
+      padding: 2rem 1rem;
+    }
+    .feature-box {
+      margin: 1rem 0;
+    }
+  }
+</style>
+{% endblock %}
+

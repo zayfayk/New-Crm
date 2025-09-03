@@ -1,0 +1,436 @@
+{% extends "LeadTracker/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+
+  <!-- Başlık -->
+  <div class="text-center mb-4">
+    <h1 class="display-5">Employee Analytics</h1>
+    <p class="text-muted">Track each employee's performance and activity</p>
+  </div>
+
+  <!-- Genel İstatistik Kartları -->
+  <div class="row g-3 mb-4 text-center">
+    <div class="col-md-4">
+      <div class="card shadow-sm p-3 h-100">
+        <h6><i class="fas fa-chart-bar text-success me-2"></i>Total Records Added</h6>
+        <p class="display-6">{{ clients|length }}</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm p-3 h-100">
+        <h6><i class="fas fa-clock text-primary me-2"></i>Last Record Added</h6>
+        <p class="display-6">
+          {% if clients.exists %}
+            {{ clients.last.creation_date|date:"d M Y H:i" }}
+          {% else %}
+            None
+          {% endif %}
+        </p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm p-3 h-100">
+        <h6><i class="fas fa-users text-info me-2"></i>Active Employees</h6>
+        <p class="display-6">{{ analytics_data|length }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end mb-2">
+    <button id="downloadDaily" class="btn btn-sm btn-outline-success">Download Daily Chart</button>
+  </div>
+  <!-- Chart -->
+  <div class="card shadow-sm p-3 mb-4">
+    <h5 class="text-center mb-3">Daily Records Chart</h5>
+    <canvas id="dailyRecordsChart" width="400" height="200"></canvas>
+  </div>
+
+  <div class="d-flex justify-content-end mb-2">
+    <button id="downloadMonthly" class="btn btn-sm btn-outline-success">Download Monthly Chart</button>
+  </div>
+  <!-- Aylık Chart -->
+  <div class="card shadow-sm p-3 mb-4">
+    <h5 class="text-center mb-3">Monthly Records Chart</h5>
+    <canvas id="monthlyRecordsChart" width="400" height="200"></canvas>
+  </div>
+
+  <!-- Günlük Sayılar Tablosu -->
+  <div class="card shadow-sm p-3 mb-4">
+    <h5 class="text-center mb-3">Daily Record Counts</h5>
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped table-hover text-center align-middle">
+        <thead class="table-success">
+          <tr>
+            <th>Employee</th>
+            {% for day, _ in analytics_data.0.daily_counts.items %}
+              <th>{{ day }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for data in analytics_data %}
+            <tr>
+              <td class="fw-bold text-success">{{ data.employee.username }}</td>
+              {% for day, count in data.daily_counts.items %}
+                <td class="{% if count > 0 %}bg-success text-white{% else %}bg-light text-muted{% endif %}">
+                  {{ count }}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Employee Records -->
+  <div class="card shadow-sm p-3">
+    <h5 class="text-center mb-3">Employee Records</h5>
+
+    <div class="input-group mb-3">
+      <span class="input-group-text bg-success text-white"><i class="fas fa-search"></i></span>
+      <input type="text" id="employeeSearch" class="form-control" placeholder="Search an employee...">
+    </div>
+
+    <div id="employeeRecords" class="row row-cols-1 row-cols-md-2 g-3">
+      {% for data in analytics_data %}
+        <div class="col" data-username="{{ data.employee.username|lower }}">
+          <div class="card shadow-sm h-100 border-0">
+            <div class="card-body border-start border-4 border-success">
+              <h6 class="text-success">{{ data.employee.username }}</h6>
+              <p class="mb-1">Total Records: <span class="badge bg-success">{{ data.total_records }}</span></p>
+              <p class="mb-2">Last Record: 
+                {% if data.last_record %}
+                  <span class="text-muted">{{ data.last_record }}</span>
+                {% else %}
+                  <span class="text-danger">No records</span>
+                {% endif %}
+              </p>
+               <a href="{% url 'export_to_excel' %}?username={{ data.employee.username|lower }}" class="btn btn-outline-success">Export Excel</a>
+              <button class="btn btn-outline-success view-records" data-username="{{ data.employee.username|lower }}">View Records</button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Detailed Records Section -->
+    <div id="detailedRecords" class="mt-4" style="display: none;">
+      <h6 class="text-center mb-3">Detailed Records for <span id="selectedEmployee"></span></h6>
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped text-center">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Created By</th>
+              <th>Creation Date</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody id="detailedRecordsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+<script>
+function stringToColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const c = (hash & 0x00FFFFFF)
+    .toString(16)
+    .toUpperCase();
+  return "#" + "00000".substring(0, 6 - c.length) + c;
+}
+
+let recordCache = {};
+
+function fetchRecords(employeeId) {
+  if (recordCache[employeeId]) {
+    return Promise.resolve(recordCache[employeeId]);
+  }
+  return fetch(`/api/records/${employeeId}`)
+    .then(response => response.json())
+    .then(data => {
+      recordCache[employeeId] = data;
+      return data;
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const ctx = document.getElementById('dailyRecordsChart').getContext('2d');
+  const labels = [{% for day, _ in analytics_data.0.daily_counts.items %}"{{ day }}",{% endfor %}];
+
+  function getRandomColor(alpha = 1) {
+    return `rgba(${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},${alpha})`;
+  }
+
+  const datasets = [
+    {% for data in analytics_data %}
+    {
+      label: "{{ data.employee.username }}",
+      data: [{% for day, count in data.daily_counts.items %}{{ count }},{% endfor %}],
+      borderColor: getRandomColor(1),
+      backgroundColor: getRandomColor(0.2),
+      borderWidth: 2,
+      fill: true,
+      tension: 0.4,
+      pointStyle: 'circle', // Veri noktası stili
+      pointRadius: 5, // Nokta boyutu
+      pointHoverRadius: 7 // Üzerine gelindiğinde büyüklük
+    },
+    {% endfor %}
+  ];
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: datasets
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { boxWidth: 15, padding: 15 }
+        },
+        tooltip: {
+          enabled: true,
+          callbacks: {
+            label: function (context) {
+              const employeeName = context.dataset.label;
+              const value = context.raw;
+              return `${employeeName}: ${value}`;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { precision: 0 }
+        }
+      },
+      animation: {
+        duration: 1000,
+        easing: 'easeInOutBounce'
+      }
+    }
+  });
+
+  // Monthly Records Chart
+  const ctxMonthly = document.getElementById('monthlyRecordsChart').getContext('2d');
+  const labelsMonthly = [
+    {% for month in analytics_data.0.monthly_counts.keys %}
+      "{{ month }}",
+    {% endfor %}
+  ];
+
+  const monthlyDatasets = [
+    {% for data in analytics_data %}
+    {
+      label: "{{ data.employee.username }}",
+      data: [
+        {% for month, count in data.monthly_counts.items %}
+          {{ count }},
+        {% endfor %}
+      ],
+      backgroundColor: getRandomColor(0.6),
+      borderColor: getRandomColor(1),
+      borderWidth: 1
+    },
+    {% endfor %}
+  ];
+
+  new Chart(ctxMonthly, {
+    type: 'bar', // Grouped bar chart for CRM-style visualization
+    data: {
+      labels: labelsMonthly,
+      datasets: monthlyDatasets
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { boxWidth: 15, padding: 15 }
+        },
+        tooltip: {
+          enabled: true,
+          callbacks: {
+            label: function (context) {
+              const value = context.raw;
+              return `${context.dataset.label}: ${value}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          stacked: true, // Stack bars for better comparison
+          grid: { display: false }
+        },
+        y: {
+          beginAtZero: true,
+          stacked: true, // Stack bars for better comparison
+          ticks: { precision: 0 }
+        }
+      },
+      animation: {
+        duration: 1000,
+        easing: 'easeInOutQuad'
+      }
+    }
+  });
+
+  // Veri indirme özelliği
+  document.getElementById('downloadChart').addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.href = ctx.canvas.toDataURL('image/png');
+    link.download = 'chart.png';
+    link.click();
+  });
+});
+
+// Search and detailed records
+document.addEventListener("DOMContentLoaded", function () {
+  const searchInput = document.getElementById("employeeSearch");
+  const recordsContainer = document.getElementById("employeeRecords");
+  const records = Array.from(recordsContainer.getElementsByClassName("col"));
+  const detailedSection = document.getElementById("detailedRecords");
+  const detailedBody = document.getElementById("detailedRecordsBody");
+  const selectedSpan = document.getElementById("selectedEmployee");
+
+  searchInput.addEventListener("input", function () {
+    const query = searchInput.value.toLowerCase();
+    records.forEach(record => record.style.display = record.dataset.username.includes(query) ? 'block' : 'none');
+  });
+
+  document.querySelectorAll(".view-records").forEach(button => {
+    button.addEventListener("click", function () {
+      const username = this.dataset.username;
+      const detailedBody = document.getElementById("detailedRecordsBody");
+      const detailedSection = document.getElementById("detailedRecords");
+      const selectedSpan = document.getElementById("selectedEmployee");
+
+      selectedSpan.textContent = username;
+
+      fetch(`/api/records?username=${username}`)
+        .then(res => res.json())
+        .then(data => {
+          detailedBody.innerHTML = "";
+          if (data.records && data.records.length > 0) {
+            data.records.forEach(r => {
+              const details = r.details.map(d => `<strong>${d.field_name}:</strong> ${d.field_value}`).join("<br>");
+              detailedBody.innerHTML += `<tr>
+                <td>${r.id}</td>
+                <td>${r.created_by}</td>
+                <td>${r.creation_date}</td>
+                <td>${details}</td>
+              </tr>`;
+            });
+          } else {
+            detailedBody.innerHTML = `<tr><td colspan="4" class="text-center">No records found</td></tr>`;
+          }
+          detailedSection.style.display = "block";
+        })
+        .catch(err => console.error(err));
+    });
+  });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("downloadDaily").addEventListener("click", function () {
+    const link = document.createElement("a");
+    link.href = document.getElementById("dailyRecordsChart").toDataURL("image/png");
+    link.download = "daily_records_chart.png";
+    link.click();
+  });
+
+  document.getElementById("downloadMonthly").addEventListener("click", function () {
+    const link = document.createElement("a");
+    link.href = document.getElementById("monthlyRecordsChart").toDataURL("image/png");
+    link.download = "monthly_records_chart.png";
+    link.click();
+  });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const dailyChartCtx = document.getElementById('dailyRecordsChart').getContext('2d');
+
+  let dailyChart = new Chart(dailyChartCtx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Hourly Records',
+        data: [],
+        borderColor: "rgba(75, 192, 192, 1)",
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        tension: 0.4
+      }]
+    },
+    options: { responsive: true }
+  });
+
+  function updateDailyChart() {
+    fetch('/hourly-records-data/')
+      .then(response => response.json())
+      .then(data => {
+        const hourlyCounts = data.hourly_counts;
+        dailyChart.data.labels = Object.keys(hourlyCounts);
+        dailyChart.data.datasets[0].data = Object.values(hourlyCounts);
+        dailyChart.update();
+      })
+      .catch(error => console.error('Error fetching hourly data:', error));
+  }
+
+  // Initial chart update
+  updateDailyChart();
+
+  // Update chart every 10 seconds
+  setInterval(updateDailyChart, 10000);
+});
+</script>
+
+
+
+<!-- CSS for Mobile Support -->
+<style>
+  @media (max-width: 768px) {
+    .table {
+      font-size: 0.9rem; /* Tablo yazı boyutunu küçült */
+    }
+    .card {
+      margin-bottom: 1rem; /* Kartlar arasında boşluk */
+    }
+    .btn {
+      font-size: 0.8rem; /* Buton yazı boyutunu küçült */
+    }
+    .input-group {
+      flex-direction: column; /* Arama çubuğunu dikey hizala */
+    }
+    .input-group-text {
+      width: 100%; /* Arama ikonunu tam genişlik yap */
+      text-align: center;
+    }
+    #employeeRecords .col {
+      flex: 0 0 100%; /* Kartları tam genişlik yap */
+    }
+  }
+</style>
+
+<div class="text-end mb-3">
+  <a href="{% url 'export_to_excel' %}" class="btn btn-success">Export To Excel All Data</a>
+</div>
+{% endblock %}

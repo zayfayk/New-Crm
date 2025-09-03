@@ -1,0 +1,75 @@
+{% extends "LeadTracker/base.html" %}
+
+<head>
+  {% load static %}
+  <link href="{% static 'fontawesome/all.min.css' %}" rel="stylesheet">
+  <style>
+    .card {
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .card-header {
+      background: linear-gradient(90deg, #4e73df, #224abe);
+      color: white;
+    }
+    .card-body {
+      font-family: 'Arial', sans-serif;
+      line-height: 1.6;
+    }
+    .btn {
+      border-radius: 50px;
+      padding: 10px 20px;
+    }
+    .btn-secondary {
+      background-color: #6c757d;
+      border: none;
+    }
+    .btn-secondary:hover {
+      background-color: #5a6268;
+    }
+  </style>
+</head>
+
+{% block content %}
+<div class="container mt-5">
+  <div class="text-center mb-4">
+    <h1 class="display-4">Customer Details</h1>
+    <p class="text-muted">View detailed information about the customer</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header text-center">
+      <h2 class="fw-bold">{{ customer.name }}</h2>
+    </div>
+    <div class="card-body">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <p><strong>ID:</strong> {{ customer.id }}</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>Created By:</strong> {{ customer.created_by.username }}</p>
+          <p><strong>Creation Date:</strong> {{ customer.creation_date }}</p>
+        </div>
+      </div>
+
+      <hr>
+
+      <h4 class="text-secondary">Additional Details</h4>
+      <div class="row">
+        {% for field in customer.fields.all %}
+          <div class="col-md-6 mb-2">
+            <p><strong>{{ field.template.name }}:</strong> {{ field.value }}</p>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="text-center mt-4">
+        <a href="{% url 'dashboardView' %}" class="btn btn-secondary btn-lg">
+          <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

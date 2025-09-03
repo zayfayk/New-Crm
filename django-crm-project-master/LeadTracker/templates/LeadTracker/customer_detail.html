@@ -1,0 +1,46 @@
+{% extends "LeadTracker/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Customer Details</h2>
+    <a href="{% url 'dashboardView' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+  </div>
+
+  {% if not rows %}
+  <div class="alert alert-info">No clients found.</div>
+  {% else %}
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Created By</th>
+              <th scope="col">Creation Date</th>
+              {% for field in field_templates %}
+              <th scope="col">{{ field.name }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+            <tr>
+              <td class="align-middle">{{ row.client.id }}</td>
+              <td class="align-middle">{{ row.client.created_by.username }}</td>
+              <td class="align-middle">{{ row.client.creation_date|date:"Y-m-d H:i" }}</td>
+
+              {% for value in row.values %}
+              <td class="align-middle">{{ value }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

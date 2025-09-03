@@ -1,0 +1,131 @@
+{% extends "LeadTracker/base.html" %}
+
+<head>
+  {% load static %}
+  <link href="{% static 'fontawesome/all.min.css' %}" rel="stylesheet">
+  <style>
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      .display-4 {
+        font-size: 1.8rem;
+      }
+      .btn {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+      }
+      .table {
+        font-size: 0.8rem;
+        overflow-x: auto; /* Ensure table content fits within the viewport */
+      }
+      .table th, .table td {
+        padding: 0.5rem;
+        white-space: nowrap; /* Prevent text wrapping */
+      }
+      .alert {
+        font-size: 0.9rem;
+      }
+      .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto; /* Add horizontal scrolling for tables */
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
+      }
+      .table {
+        min-width: 600px; /* Ensure table has a minimum width */
+      }
+    }
+  </style>
+</head>
+
+{% block content %}
+<div class="container mt-5">
+  <div class="text-center mb-4">
+    <h1 class="display-4">Dashboard</h1>
+    <p class="text-muted">Manage your customers and their dynamic fields efficiently</p>
+  </div>
+
+  <!-- Warning Message -->
+  {% if warning_message %}
+  <div class="alert alert-warning text-center" role="alert">
+    {{ warning_message }}
+  </div>
+  {% endif %}
+
+  <!-- Add Record Button -->
+  <div class="d-flex justify-content-end mb-4">
+    <a href="{% url 'create_client_record' %}" class="btn btn-success btn-lg shadow-sm">
+      <i class="fas fa-plus-circle me-2"></i>Add Record
+    </a>
+  </div>
+
+  <!-- Customer Table with Dynamic Fields -->
+  <div>
+    <h2 class="mb-4">Customer Records</h2>
+    <div class="table-responsive">
+      <table class="table table-hover table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Created By</th>
+            <th>Creation Date</th>
+            {% for field in field_templates %}
+            <th>{{ field.name }}</th>
+            {% endfor %}
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for client in clients %}
+          <tr>
+            <td>{{ client.id }}</td>
+            <td>{{ client.created_by.username }}</td>
+            <td>{{ client.creation_date }}</td>
+            {% for field in field_templates %}
+            <td>
+              {% with client.fields.all as client_fields %}
+              {% for client_field in client_fields %}
+                {% if client_field.template.id == field.id %}
+                  {{ client_field.value }}
+                {% endif %}
+              {% endfor %}
+              {% endwith %}
+            </td>
+            {% endfor %}
+            <td>
+              <a href="{% url 'view_customer' client.id %}" class="btn btn-outline-info btn-sm me-2">
+                <i class="fas fa-eye"></i>
+              </a>
+              <a href="{% url 'edit_customer' client.id %}" class="btn btn-outline-warning btn-sm me-2">
+                <i class="fas fa-edit"></i>
+              </a>
+              {% if user.is_superuser %}
+                <a href="{% url 'delete_customer' client.id %}" class="btn btn-outline-danger btn-sm">
+                  <i class="fas fa-trash"></i>
+                </a>
+              {% endif %}
+              
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="{{ 4|add:field_templates|length }}" class="text-center">No customers found</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Analytics Button for Superuser -->
+  {% if user.is_superuser %}
+  <div class="d-flex">
+    <!-- Main Content -->
+    <div class="flex-grow-1 p-4">
+      <!-- Existing dashboard content -->
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

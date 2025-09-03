@@ -1,0 +1,73 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold text-uppercase" href="{% url 'index' %}">Elite CRM</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="{% url 'index' %}">Home</a>
+        </li>
+        {% if user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'dashboardView' %}">Dashboard <i class="fa fa-home ms-1"></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/chat/">Chat <i class="fa fa-comments ms-1"></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'logout' %}">Sign out <i class="fa fa-sign-out ms-1"></i></a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'login' %}">Login</a>
+        </li>
+        {% endif %}
+      </ul>
+      <form class="d-flex" role="search">
+        <input
+          class="form-control me-2 border-0 rounded-pill"
+          type="search"
+          placeholder="Search"
+          aria-label="Search"
+        />
+        <button class="btn btn-outline-success rounded-pill" type="submit">Search</button>
+      </form>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .navbar {
+    background: linear-gradient(45deg, #343a40, #212529);
+  }
+  .navbar-brand {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+  }
+  .nav-link {
+    font-size: 1rem;
+    transition: color 0.3s;
+  }
+  .nav-link:hover {
+    color: #0dcaf0 !important;
+  }
+  .btn-outline-success {
+    border-color: #0dcaf0;
+    color: #0dcaf0;
+  }
+  .btn-outline-success:hover {
+    background-color: #0dcaf0;
+    color: #fff;
+  }
+</style>
+
+<!-- Temporarily removed the 'index' URL to debug RecursionError -->
