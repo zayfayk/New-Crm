@@ -15,8 +15,8 @@ class DynamicClientAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        instance = kwargs.get('instance')
-        if instance:
+
+        if instance := kwargs.get('instance'):
             for field in FieldTemplate.objects.all():
                 client_field = instance.fields.filter(template=field).first()
                 value = client_field.value if client_field else ''
