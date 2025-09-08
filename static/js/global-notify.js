@@ -7,7 +7,8 @@
 
     // Bildirim göstermek için basit bir fonksiyon
 
-    function showNotification(message, type = 'success') {
+    // Avoid function declaration in block, use assignment expression
+    const showNotification = function(message, type = 'success') {
         // Modern ve animasyonlu bildirim kutusu
         const notification = document.createElement('div');
         notification.className = `notification-fancy ${type === 'error' ? 'error' : ''}`;
@@ -93,7 +94,7 @@
             `;
             document.head.appendChild(style);
         }
-    }
+    };
 
     // Bildirim sesi
     const playNotificationSound = function() {
