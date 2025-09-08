@@ -70,7 +70,9 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUsers();                 // Kullanıcı listesini yükle
     startUsersPolling();         // Kullanıcı listesi güncelleme polling'ini başlat
     setupPageVisibilityTracking(); // Sayfa görünürlük takibi
+
 });
+
 
 /* EVENT LISTENER'LARI KURMA FONKSİYONU
    Tüm kullanıcı etkileşimlerini dinleyen event listener'ları tanımlar.
@@ -79,9 +81,32 @@ document.addEventListener('DOMContentLoaded', function() {
 */
 function setupEventListeners() {
     // MESAJ INPUT EVENTLERİ
+
     messageInput.addEventListener('input', handleInputChange);        // Yazma sırasında
-    messageInput.addEventListener('keypress', handleKeyPress);        // Tuşa basma
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !sendBtn.disabled) {
+            e.preventDefault(); // Enter'da form submit ve blur'u engelle
+            sendTypingStatus(false);
+            handleSendMessage();
+            if (window.innerWidth <= 768) {
+                setTimeout(() => messageInput.focus(), 100);
+            }
+        }
+    });
     messageInput.addEventListener('blur', () => sendTypingStatus(false)); // Odak kaybı
+
+    // Form submit'ini engelle (klavye kapanmasın)
+    if (messageInput.form) {
+        messageInput.form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!sendBtn.disabled) {
+                handleSendMessage();
+                if (window.innerWidth <= 768) {
+                    setTimeout(() => messageInput.focus(), 100);
+                }
+            }
+        });
+    }
 
     // BUTON EVENTLERİ
     sendBtn.addEventListener('click', handleSendMessage);             // Gönder butonu
@@ -198,6 +223,13 @@ async function handleSendMessage() {
             await loadMessages();
             showNotification('Message sent');
             playNotificationSound();
+
+            // Mobilde klavye açık kalsın: input'u tekrar odakla
+            if (window.innerWidth <= 768) {
+                setTimeout(() => {
+                    messageInput.focus();
+                }, 100);
+            }
         } else {
             showNotification(data.error || 'Failed to send message', 'error');
         }
@@ -467,6 +499,7 @@ function displayUsers(users) {
         return;
     }
 
+
     users.forEach(user => {  // Her kullanıcı için
         const userDiv = document.createElement('div');  // Kart elementi
         userDiv.className = 'user-item';  // CSS sınıfı
@@ -475,10 +508,16 @@ function displayUsers(users) {
         const statusClass = user.is_online ? 'online' : 'offline';  // Durum sınıfı
         const statusText = user.is_online ? 'Online' : 'Offline';   // Durum metni
 
+        // Unread badge HTML
+        let unreadBadge = '';
+        if (user.unread_count && user.unread_count > 0) {
+            unreadBadge = `<span class="unread-badge">${user.unread_count}</span>`;
+        }
+
         userDiv.innerHTML = `
-            <img src="${user.avatar}" alt="${user.full_name}" class="user-avatar" onerror="this.src='/media/profile_pictures/default_avatar_JxNUiAn.png'">
+            <img src="${user.avatar}" alt="${user.full_name}" class="user-avatar" onerror="this.src='/media/profile_pictures/default_avatar_JxNUiAn.jpg'">
             <div class="user-info">
-                <div class="user-name">${user.full_name}</div>
+                <div class="user-name">${user.full_name} ${unreadBadge}</div>
                 <div class="user-status">
                     <span class="status-dot ${statusClass}"></span>
                     ${statusText}
@@ -508,7 +547,7 @@ async function selectUser(user) {
     chatTitle.textContent = user.full_name;  // Başlığı güncelle
     chatHeaderAvatar.src = user.avatar;  // Profil resmini güncelle
     chatHeaderAvatar.onerror = function() {  // Hata durumunda varsayılan resim
-        this.src = '/media/profile_pictures/default_avatar_JxNUiAn.png';
+        this.src = '/media/profile_pictures/default_avatar_JxNUiAn.jpg';
     };
 
     // DURUM GÖSTERİMİ
@@ -519,6 +558,16 @@ async function selectUser(user) {
     // UI GÖRÜNÜRLÜK DEĞİŞİKLİKLERİ
     document.querySelector('.welcome-message').style.display = 'none';  // Hoş geldin mesajını gizle
     messageInputArea.style.display = 'flex';  // Mesaj input'unu göster
+
+    // YENİ KULLANICI SEÇİLDİĞİNDE MESAJLARI TEMİZLE ve welcome-message ekle
+    if (messagesContainer) {
+        messagesContainer.innerHTML = `
+            <div class="welcome-message">
+                <h3>Chat Application</h3>
+                <p>Select a user from the left to start chatting.</p>
+            </div>
+        `;
+    }
 
     setTimeout(() => {
         updateMobileHeights();  // Mobil yükseklikleri güncelle
@@ -1013,7 +1062,7 @@ function setupAutoResize() {
     }
 }
 
-function playNotificationSound() {
+const playNotificationSound = function() {
     try {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const oscillator = audioContext.createOscillator();
@@ -1033,7 +1082,7 @@ function playNotificationSound() {
     } catch (e) {
         console.log('Notification sound played');
     }
-}
+};
 
 function toggleSidebar() {
     if (window.innerWidth <= 768) {

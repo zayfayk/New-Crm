@@ -1,3 +1,7 @@
+# Gerekli importlar
+from django.contrib.auth.decorators import login_required
+# --- AJAX CANLI BİLDİRİM ENDPOINTİ ---
+from django.views.decorators.http import require_GET
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -10,7 +14,33 @@ from django.core.cache import cache
 import json
 
 User = get_user_model()
+@require_GET
+@login_required
+def get_notifications(request):
+    """Kullanıcının okunmamış mesaj sayısını döndürür (canlı bildirim için)"""
+    # WhatsApp tarzı: Son okunmamış mesajın içeriği ve id'si de döndürülür
+    user_rooms = ChatRoom.objects.filter(members=request.user)
+    unread_messages = ChatMessage.objects.filter(
+        room__in=user_rooms,
+        is_read=False
+    ).exclude(sender=request.user).order_by('-timestamp')
 
+    unread_count = unread_messages.count()
+    last_message_id = None
+    last_message_content = None
+    last_message_sender = None
+    if unread_count > 0:
+        last_message = unread_messages.first()
+        last_message_id = last_message.id
+        last_message_content = last_message.content[:100]
+        last_message_sender = last_message.sender.get_full_name() or last_message.sender.username
+
+    return JsonResponse({
+        'unread_count': unread_count,
+        'last_message_id': last_message_id,
+        'last_message_content': last_message_content,
+        'last_message_sender': last_message_sender
+    })
 @login_required
 def chat_view(request):
     """Ana chat sayfası"""
@@ -142,7 +172,7 @@ def get_messages(request):
                 'sender_avatar': (
                     msg.sender.profile.profile_picture.url
                     if hasattr(msg.sender, 'profile') and msg.sender.profile.profile_picture
-                    else '/media/profile_pictures/default_avatar_JxNUiAn.png'
+                    else '/media/profile_pictures/default_avatar_JxNUiAn.jpg'
                 ),
                 'content': msg.content,
                 'timestamp': msg.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
@@ -197,7 +227,7 @@ def get_users(request):
                 'avatar': (
                     user.profile.profile_picture.url
                     if hasattr(user, 'profile') and user.profile.profile_picture
-                    else '/media/profile_pictures/default_avatar_JxNUiAn.png'
+                    else '/media/profile_pictures/default_avatar_JxNUiAn.jpg'
                 ),
                 'is_online': is_online,
                 'unread_count': unread_count
@@ -367,3 +397,4 @@ def user_presence(request):
 
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+

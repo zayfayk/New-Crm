@@ -13,4 +13,5 @@ urlpatterns = [
     path('api/mark-room-read/', views.mark_room_messages_read, name='mark_room_messages_read'),
     path('api/typing-status/', views.typing_status, name='typing_status'),
     path('api/user-presence/', views.user_presence, name='user_presence'),
+    path('api/get-notifications/', views.get_notifications, name='get_notifications'),  # Yeni endpoint
 ]
