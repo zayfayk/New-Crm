@@ -1,62 +1,60 @@
-DjangoEliteCRM
 
-Modern, full-featured Customer Relationship Management (CRM) system built with Django 5.2.5.
+# DjangoEliteCRM
 
-Features
+Modern, full-featured Customer Relationship Management (CRM) system built with **Django 5.2.5**.
 
-User management and authentication (Custom User Model)
+---
 
-Real-time chat and live notification system (AJAX polling, WhatsApp-style UI)
+## Features
 
-Unread message badge in the sidebar
+- **User management and authentication** (Custom User Model)
+- **Real-time chat** and live notification system (AJAX polling, WhatsApp-style UI)
+- **Unread message badge** in the sidebar
+- **Lead and customer management**, dashboard and analytics screens
+- **Responsive and mobile-friendly interface** (Flexbox, modern CSS)
+- **Advanced form management** (django-crispy-forms, bootstrap4/5)
+- **Data import/export with Excel** (openpyxl)
+- **Admin panel** and custom admin tools
 
-Lead and customer management, dashboard and analytics screens
+---
 
-Responsive and mobile-friendly interface (Flexbox, modern CSS)
+## Installation
 
-Advanced form management (django-crispy-forms, bootstrap4/5)
+1. **Clone the repository:**
+	```sh
+	git clone https://github.com/zayfayk/New-Crm.git
+	cd New-Crm
+	```
+2. **Create and activate a virtual environment:**
+	```sh
+	python -m venv venv
+	# Windows:
+	venv\Scripts\activate
+	# Mac/Linux:
+	source venv/bin/activate
+	```
+3. **Install requirements:**
+	```sh
+	pip install -r requirements.txt
+	```
+4. **Run migrations:**
+	```sh
+	python manage.py migrate
+	```
+5. **Create a superuser:**
+	```sh
+	python manage.py createsuperuser
+	```
+6. **Start the development server:**
+	```sh
+	python manage.py runserver
+	```
 
-Data import/export with Excel (openpyxl)
+---
 
-Admin panel and custom admin tools
+## requirements.txt
 
-Installation
-
-Clone the repository:
-
-git clone https://github.com/zayfayk/New-Crm.git
-cd New-Crm
-
-
-Create and activate a virtual environment:
-
-python -m venv venv
-# Windows:
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
-
-
-Install requirements:
-
-pip install -r requirements.txt
-
-
-Run migrations:
-
-python manage.py migrate
-
-
-Create a superuser:
-
-python manage.py createsuperuser
-
-
-Start the development server:
-
-python manage.py runserver
-
-requirements.txt
+```
 asgiref==3.9.1
 crispy-bootstrap4==2025.6
 crispy-bootstrap5==2025.6
@@ -73,69 +71,65 @@ six==1.17.0
 sqlparse==0.5.3
 tzdata==2025.2
 waitress==3.0.2
+```
 
-License
+---
+
+## License
 
 GNU GPL v3
 
-DjangoEliteCRM (Türkçe)
+---
+
+## DjangoEliteCRM (Türkçe)
 
 Django 5.2.5 ile geliştirilmiş modern ve tam özellikli Müşteri İlişkileri Yönetimi (CRM) sistemi.
 
-Özellikler
+### Özellikler
 
-Kullanıcı yönetimi ve kimlik doğrulama (Custom User Model)
+- Kullanıcı yönetimi ve kimlik doğrulama (Custom User Model)
+- Gerçek zamanlı chat ve canlı bildirim sistemi (AJAX polling, WhatsApp tarzı UI)
+- Sidebar'da okunmamış mesaj sayısı rozeti
+- Lead ve müşteri yönetimi, dashboard ve analiz ekranları
+- Responsive ve mobil uyumlu arayüz (Flexbox, modern CSS)
+- Gelişmiş form yönetimi (django-crispy-forms, bootstrap4/5)
+- Excel (openpyxl) ile veri aktarımı
+- Admin paneli ve özel yönetici araçları
 
-Gerçek zamanlı chat ve canlı bildirim sistemi (AJAX polling, WhatsApp tarzı UI)
+### Kurulum
 
-Sidebar'da okunmamış mesaj sayısı rozeti
+1. Depoyu klonlayın:
+	```sh
+	git clone https://github.com/zayfayk/New-Crm.git
+	cd New-Crm
+	```
+2. Sanal ortam oluşturun ve aktif edin:
+	```sh
+	python -m venv venv
+	# Windows:
+	venv\Scripts\activate
+	# Mac/Linux:
+	source venv/bin/activate
+	```
+3. Gereksinimleri yükleyin:
+	```sh
+	pip install -r requirements.txt
+	```
+4. Veritabanını başlatın:
+	```sh
+	python manage.py migrate
+	```
+5. Yönetici hesabı oluşturun:
+	```sh
+	python manage.py createsuperuser
+	```
+6. Sunucuyu başlatın:
+	```sh
+	python manage.py runserver
+	```
 
-Lead ve müşteri yönetimi, dashboard ve analiz ekranları
+---
 
-Responsive ve mobil uyumlu arayüz (Flexbox, modern CSS)
-
-Gelişmiş form yönetimi (django-crispy-forms, bootstrap4/5)
-
-Excel (openpyxl) ile veri aktarımı
-
-Admin paneli ve özel yönetici araçları
-
-Kurulum
-
-Depoyu klonlayın:
-
-git clone https://github.com/zayfayk/New-Crm.git
-cd New-Crm
-
-
-Sanal ortam oluşturun ve aktif edin:
-
-python -m venv venv
-# Windows:
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
-
-
-Gereksinimleri yükleyin:
-
-pip install -r requirements.txt
-
-
-Veritabanını başlatın:
-
-python manage.py migrate
-
-
-Yönetici hesabı oluşturun:
-
-python manage.py createsuperuser
-
-
-Sunucuyu başlatın:
-
-python manage.py runserver
-
-Lisans
+### Lisans
 
 GNU GPL v3
