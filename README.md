@@ -81,6 +81,64 @@ GNU GPL v3
 
 ---
 
+
+---
+
+## DjangoEliteCRM (العربية)
+
+نظام إدارة علاقات العملاء (CRM) حديث ومتكامل تم تطويره باستخدام **Django 5.2.5**.
+
+### الميزات
+
+- إدارة المستخدمين والمصادقة (نموذج مستخدم مخصص)
+- نظام دردشة وإشعارات فورية (استطلاع AJAX، واجهة شبيهة بواتساب)
+- شارة الرسائل غير المقروءة في الشريط الجانبي
+- إدارة العملاء والزبائن، ولوحات المعلومات والتحليلات
+- واجهة متجاوبة وصديقة للجوال (Flexbox، CSS حديث)
+- إدارة نماذج متقدمة (django-crispy-forms، bootstrap4/5)
+- استيراد/تصدير البيانات باستخدام Excel (openpyxl)
+- لوحة تحكم المشرف وأدوات إدارية مخصصة
+
+### التثبيت
+
+1. استنساخ المستودع:
+	```sh
+	git clone https://github.com/zayfayk/New-Crm.git
+	cd New-Crm
+	```
+2. إنشاء وتفعيل بيئة افتراضية:
+	```sh
+	python -m venv venv
+	# Windows:
+	venv\Scripts\activate
+	# Mac/Linux:
+	source venv/bin/activate
+	```
+3. تثبيت المتطلبات:
+	```sh
+	pip install -r requirements.txt
+	```
+4. تشغيل الترحيلات:
+	```sh
+	python manage.py migrate
+	```
+5. إنشاء مستخدم مشرف:
+	```sh
+	python manage.py createsuperuser
+	```
+6. بدء خادم التطوير:
+	```sh
+	python manage.py runserver
+	```
+
+---
+
+### الرخصة
+
+GNU GPL v3
+
+---
+
 ## DjangoEliteCRM (Türkçe)
 
 Django 5.2.5 ile geliştirilmiş modern ve tam özellikli Müşteri İlişkileri Yönetimi (CRM) sistemi.
